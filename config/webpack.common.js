@@ -2,6 +2,8 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+const {EnvironmentPlugin} = require("webpack");
+
 const paths = require('./paths')
 
 module.exports = {
@@ -17,6 +19,11 @@ module.exports = {
 
   // Customize the webpack build process
   plugins: [
+
+    new EnvironmentPlugin({
+      API_KEY: 'AIzaSyCSETkXIS7Ie1zf65CHSC9DSbeQWvtpMOc',
+    }),
+
     // Removes/cleans build folders and unused assets when rebuilding
     new CleanWebpackPlugin(),
 

@@ -1,14 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
 
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Twitch Train Schedule</title>
+</head>
 
-  <body>
-    <div id="root"></div>
-  </body>
+<body>
+  <div class="loader">
+    <p>Loading . . .</p>
+    <img src="<%= require('images/train.gif') %>" alt="Bears on a train" />
+  </div>
+  <div class="container">
+    <style></style>
+    <img class="train-image" src="" alt="" />
+    <h1 class="train-title"></h1>
+    <p class="train-blurb"></p>
+    <div class="timenow"></div>
+    <div class="output">
+      <ul class="dj-list">
+      </ul>
+    </div>
+  </div>
+  <script src="//cdn.jsdelivr.net/npm/luxon@2.1.1/build/global/luxon.min.js"></script>
+</body>
+
 </html>

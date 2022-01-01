@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapi.com/css2?family=Roboto&display=swap');
+
+* {
+  font-family: 'Roboto', sans-serif;
+}
+
+.rainbow-text {
+  background-image: 
+    linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;  
+  animation: move 135s linear infinite;
+}
+
+.live-now {
+  background-image: 
+    linear-gradient(to right, white, lightblue); 
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;  
+  animation: move 335s linear infinite;  
+}

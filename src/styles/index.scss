@@ -1,7 +1,7 @@
-@font-face {
-  font-family: 'Inter';
-  src: url('../fonts/Inter.ttf');
-}
-
+@import 'helpers';
 @import 'variables';
-@import 'scaffolding';
+@import 'normalize';
+@import 'reset';
+@import 'animations';
+@import 'typography';
+@import 'styles';
