@@ -63,9 +63,14 @@ GSheetReader(options, results => {
     `;
   }
 
-  if (columns != '')  
-    main.style.columnCount = columns;
-
+  if (columns != '') {
+    if(columns == 1) {
+      main.style.columnCount = 'auto';      
+    } else {
+      main.style.columnCount = columns;
+    }
+  }
+  
   setTimeout(() => {
     document.querySelector('.loader').classList.add('hidden'); 
     document.title = `${results[0]["Raid Title"]} Schedule`;
@@ -103,7 +108,7 @@ GSheetReader(options, results => {
       }
       convertedTime = convertedTime.toLocaleString(DateTime.TIME_SIMPLE);
       const dateHeader = `<li class="date-header">${currentDateList}</li>`
-      const listItem = `<li${isLive ? ' class="live"' : ''}><a class="twitch-cta d-block" href="https://twitch.tv/${(result["Twitch handle"])}" target="_blank">${convertedTime} - ${(result["DJ Name"])}${isLive ? ' - <span class="live-now">LIVE NOW!</span>' : ''}</a>${hasLocation ? `<span class="location d-block">From: ${result["Location"]}` : ''}${hasGenre ? `</span><span class="genre d-block">Genre: ${result["Genre"]}` : ''}</span> </li>`;
+      const listItem = `<li${isLive ? ' class="live"' : ''}><a class="twitch-cta" href="https://twitch.tv/${(result["Twitch handle"])}" target="_blank">${convertedTime} - ${(result["DJ Name"])}${isLive ? ' - <span class="live-now">LIVE NOW!</span>' : ''}</a>${hasLocation ? `<span class="location d-block">From: ${result["Location"]}` : ''}${hasGenre ? `</span><span class="genre d-block">Genre: ${result["Genre"]}` : ''}</span> </li>`;
 
       if (newDate) {
         main.innerHTML += dateHeader;
@@ -116,4 +121,7 @@ GSheetReader(options, results => {
   });
 }).catch (err => {
   console.log(err);
+  document.querySelector('.loader').classList.add('hidden'); 
+  document.querySelector('.content').classList.add('hidden'); 
+  document.querySelector('.error').classList.add('visible'); 
 });

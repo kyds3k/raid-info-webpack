@@ -10,6 +10,35 @@
   margin: 0 auto;
   padding-top: 1rem;
 
+  &.error {
+    display: none;
+
+    &.visible {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+
+      h2 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      img {
+        display: block;
+        width: 100%;
+        max-width: 800px;
+      }
+    }
+  }
+
+  &.content {
+    &.hidden {
+      display: none;
+    };
+  }
+
   @media screen and (max-width: 768px) {
     padding: 1rem 1rem 0;
   }
@@ -74,9 +103,9 @@
 
 .dj-list {
   column-count: 4;
-  column-gap: 0rem;
+  column-gap: 3rem;
   column-width: auto;
-  width: 75%;
+  width: fit-content;
 
   @media screen and (max-width: 768px) {
     column-count: 1!important;
@@ -97,7 +126,6 @@
       font-weight: bold;
       font-size: 2rem;
       margin-bottom: .5rem;
-      break-before: column;
 
       @media screen and (max-width: 768px) {
         break-before: avoid;
@@ -113,5 +141,6 @@
     font-weight: 700;
     font-size: 1.2rem;
     margin-bottom: .3rem;
+    display: inline-block;
   }
 }
