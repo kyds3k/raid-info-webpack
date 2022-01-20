@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" xmnls:og="https://ogp.me/ns#">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <meta property="og:title" content="Twitch Raid Train Scheduler" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://twitchtrains.com/train-gif.gif" />
+  <link rel="image_src" href="https://twitchtrains.com/train-gif.gif" />
   <title>Twitch Train Schedule</title>
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-8Y5H70KW70"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-8Y5H70KW70');
+  </script>  
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "a678nmn7p6");
+</script>
 </head>
 
 <body>
@@ -19,13 +38,18 @@
   </div>
   <div class="container content">
     <style></style>
-    <img class="train-image" src="" alt="" />
-    <h1 class="train-title"></h1>
-    <p class="train-blurb"></p>
-    <div class="timenow"></div>
-    <div class="output">
-      <ul class="dj-list">
-      </ul>
+    <div class="train-info">
+      <img class="train-image" src="" alt="" />
+      <h1 class="train-title"></h1>
+      <p class="train-blurb"></p>
+    </div>
+    <div class="train-schedule">
+      <div class="timenow"></div>
+      <div class="now-playing"></div>
+      <div class="output">
+        <ul class="dj-list">
+        </ul>
+      </div>
     </div>
   </div>
   <script src="//cdn.jsdelivr.net/npm/luxon@2.1.1/build/global/luxon.min.js"></script>

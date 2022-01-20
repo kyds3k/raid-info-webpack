@@ -34,6 +34,37 @@
   }
 
   &.content {
+    display: flex;
+    flex-direction: column;
+
+    .train-info {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-right: 2vw;
+    }
+
+    &.left {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+
+      .train-info {
+        display: flex;
+        flex-direction: column;
+        width: 25%;
+        margin-right: 2vw;
+
+        @media screen and (max-width: 768px) {
+          width: 100%;
+        }
+      }
+
+      @media screen and (max-width: 768px) {
+        flex-direction: column;
+      }
+    }
+
     &.hidden {
       display: none;
     };
@@ -82,7 +113,7 @@
 }
 
 .timenow {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .train-image {
@@ -99,6 +130,20 @@
 
 .train-blurb {
   margin-bottom: 1rem;
+}
+
+.now-playing {
+  margin-bottom: 2rem;
+  
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: .3rem;
+  }
+
+  a {
+    cursor: pointer;
+  }
 }
 
 .dj-list {

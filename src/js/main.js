@@ -12,6 +12,12 @@ const options = {
 
 let DateTime = luxon.DateTime;
 
+setInterval(() => {
+  if (DateTime.now().c.minute == '00') {
+    location.reload();
+  }  
+}, 60000);
+
 GSheetReader(options, results => {
   if (options.theme == 'light') {
     document.body.classList.add('light');
@@ -19,19 +25,18 @@ GSheetReader(options, results => {
     document.body.classList.add('dark');
   }
   const timeslotCount = results.length;
-  console.log(`We got ${timeslotCount} timeslots!`);
   const customStyles = document.querySelector('.container style');
   const title = document.querySelector('.train-title');
   const image = document.querySelector('.train-image');
   const trainImage = results[0]["Image URL"];
   const imageMax = results[0]["Image width"];
+  const alignment = results[0]["Image alignment"];
   const blurb = document.querySelector('.train-blurb');
   const main = document.querySelector('.dj-list');
-  const links = document.querySelector('.twitch-cta');
+  const slotLength = parseInt(results[0]["Timeslot length"]);
+  const nowPlaying = document.querySelector('.now-playing');
   const linkColor = results[0]["Link color"];
   const timeHolder = document.querySelector('.timenow');
-  const now = DateTime.now().toLocaleString(DateTime.DATETIME_MED);
-  const where = DateTime.locale;
   const columns = results[0]["Columns"];
 
   let localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -40,22 +45,30 @@ GSheetReader(options, results => {
 
   let currentDateList = "";
   let newDate = true;
-  let currentDJ = "";  
+  let currentDJ = "";
 
-  timeHolder.innerHTML = `<p>All listings are in ${currentTimezoneLocale} time.<br />Your current time is ${now}`;
+  setInterval(() => {
+    let now = DateTime.now().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
+    timeHolder.innerHTML = `<p>All listings are in ${currentTimezoneLocale} time.<br />Your current time is ${now}`;   
+  }, 1000);
+ 
 
   title.innerHTML = results[0]["Raid Title"];
   blurb.innerHTML = results[0]["Blurb"];
 
-  if(trainImage != '') {
-    image.alt=`${title}`;
-    image.src=`${trainImage}`;
+  if (trainImage != '') {
+    image.alt = `${title}`;
+    image.src = `${trainImage}`;
     customStyles.innerHTML += `
       .train-image{max-width: ${imageMax};}
     `;
   }
 
-  if(linkColor != '') {
+  if (alignment == 'left') {
+    document.querySelector('.content').classList.add('left');
+  }
+
+  if (linkColor != '') {
     customStyles.innerHTML += `
       .twitch-cta {
         color: ${linkColor}!important;
@@ -64,21 +77,22 @@ GSheetReader(options, results => {
   }
 
   if (columns != '') {
-    if(columns == 1) {
-      main.style.columnCount = 'auto';      
+    if (columns == 1) {
+      main.style.columnCount = 'auto';
     } else {
       main.style.columnCount = columns;
     }
   }
-  
+
+  document.querySelector('meta[property="og:title"]').setAttribute('content', `${results[0]["Raid Title"]} Schedule`);
   setTimeout(() => {
-    document.querySelector('.loader').classList.add('hidden'); 
+    document.querySelector('.loader').classList.add('hidden');
     document.title = `${results[0]["Raid Title"]} Schedule`;
   }, 3000);
 
   results.forEach((result, index) => {
     if (result["Twitch handle"]) {
-      if((result["DJ Name"] == currentDJ) && (index <= timeslotCount)) {
+      if ((result["DJ Name"] == currentDJ) && (index <= timeslotCount)) {
         return;
       }
       let isLive = false;
@@ -88,19 +102,20 @@ GSheetReader(options, results => {
         hasLocation = false;
       if (result["Genre"] == "")
         hasGenre = false;
-      const gmtTime = result["DateTime"];
-      let convertedTime = DateTime.fromISO(gmtTime);
+      let slotTime = result["DateTime"];
+      let convertedTime = DateTime.fromISO(slotTime);
       convertedTime = convertedTime.setZone(localTimezone);
       if (index < timeslotCount - 1) {
-        let nextTime = results[index + 1].TimeDate;
-        nextTime = DateTime.fromISO(nextTime);
-        nextTime = nextTime.setZone(localTimezone);
-        if ((DateTime.now() > convertedTime) && (DateTime.now() < nextTime)) {
+          let nextIndex = index + slotLength;
+          let nextTime = results[nextIndex].DateTime;
+          slotTime = DateTime.fromISO(slotTime);
+          nextTime = DateTime.fromISO(nextTime);
+          if ((DateTime.now() > slotTime) && (DateTime.now() < nextTime)) {
+            isLive = true;
+          }
+        } else if ((DateTime.now() > slotTime)) {
           isLive = true;
         }
-      } else if ((DateTime.now() > convertedTime)) {
-        isLive = true;
-      }
       let newDateList = convertedTime.toLocaleString(DateTime.DATE_MED);
       if (newDateList != currentDateList) {
         newDate = true;
@@ -108,7 +123,7 @@ GSheetReader(options, results => {
       }
       convertedTime = convertedTime.toLocaleString(DateTime.TIME_SIMPLE);
       const dateHeader = `<li class="date-header">${currentDateList}</li>`
-      const listItem = `<li${isLive ? ' class="live"' : ''}><a class="twitch-cta" href="https://twitch.tv/${(result["Twitch handle"])}" target="_blank">${convertedTime} - ${(result["DJ Name"])}${isLive ? ' - <span class="live-now">LIVE NOW!</span>' : ''}</a>${hasLocation ? `<span class="location d-block">From: ${result["Location"]}` : ''}${hasGenre ? `</span><span class="genre d-block">Genre: ${result["Genre"]}` : ''}</span> </li>`;
+      const listItem = `<li${isLive ? ' class="live"' : ''}><a class="twitch-cta" href="https://twitch.tv/${(result["Twitch handle"])}" target="_blank">${convertedTime} - ${(result["DJ Name"])}${isLive ? ' - <span class="live-now">LIVE NOW!</span>' : ''}</a>${hasLocation ? `<span class="location d-block">${result["Location"]}</span>` : ''}${hasGenre ? `<span class="genre d-block">${result["Genre"]}` : ''}</span> </li>`;
 
       if (newDate) {
         main.innerHTML += dateHeader;
@@ -116,12 +131,16 @@ GSheetReader(options, results => {
       }
       main.innerHTML += listItem;
       currentDJ = result["DJ Name"];
-      console.log(result["DJ Name"]);
+
+      if (isLive) {
+        nowPlaying.innerHTML = `<h2>NOW PLAYING:</h2> <a class="twitch-cta" href="https://twitch.tv/${(result["Twitch handle"])}" target="_blank">${(result["DJ Name"])}</a>${hasLocation ? ` from <span class="location">${result["Location"]}</span>` : ''}${hasGenre ? `, playing <span class="genre">${result["Genre"]}` : ''}</span>`;
+      }
+
     }
   });
-}).catch (err => {
+}).catch(err => {
   console.log(err);
-  document.querySelector('.loader').classList.add('hidden'); 
-  document.querySelector('.content').classList.add('hidden'); 
-  document.querySelector('.error').classList.add('visible'); 
+  document.querySelector('.loader').classList.add('hidden');
+  document.querySelector('.content').classList.add('hidden');
+  document.querySelector('.error').classList.add('visible');
 });
