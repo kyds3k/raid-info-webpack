@@ -70,7 +70,7 @@ GSheetReader(options, results => {
 
   if (linkColor != '') {
     customStyles.innerHTML += `
-      .twitch-cta {
+      .twitch-cta, footer a {
         color: ${linkColor}!important;
       }
     `;
