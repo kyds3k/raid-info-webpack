@@ -22,6 +22,7 @@ module.exports = {
 
     new EnvironmentPlugin({
       API_KEY: 'AIzaSyCSETkXIS7Ie1zf65CHSC9DSbeQWvtpMOc',
+      MAPBOX_KEY: 'pk.eyJ1Ijoia3lkczNrIiwiYSI6ImNsMGdnbWRxaDBiYjgzaW1zZXZsOG51MXcifQ.b34r8-pdue0v0c6my8jf3A'
     }),
 
     // Removes/cleans build folders and unused assets when rebuilding

@@ -1,22 +1,164 @@
 const GSheetReader = require('g-sheets-api');
+const loadGoogleMapsApi = require('load-google-maps-api');
+const mapboxgl = require('mapbox-gl');
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
 const options = {
   apiKey: process.env.API_KEY,
+  mapboxKey: process.env.MAPBOX_KEY,
   sheetId: urlParams.get('raid'),
   sheetNumber: urlParams.get('num'),
   theme: urlParams.get('theme'),
   returnAllResults: true
 }
 
+
 let DateTime = luxon.DateTime;
 
 setInterval(() => {
   if (DateTime.now().c.minute == '00') {
     location.reload();
-  }  
+  }
 }, 60000);
+
+let map;
+let geocoder;
+let mapQueries = 0;
+let overage = 0;
+
+function codeAddress(address, dj, handle) {
+  mapQueries++;
+
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${options.mapboxKey}&types=country,place`)
+    .then(response => response.json())
+    .then(data => {
+      const contentString =
+        '<div id="content">' +
+        '<div id="siteNotice">' +
+        "</div>" +
+        `<h1 id="firstHeading" class="firstHeading">${dj}</h1>` +
+        '<div id="bodyContent">' +
+        `<p>${address}</p>`+
+        `<a href="https://twitch.tv/${handle}" target= "_blank">https://twitch.tv/${handle}</a>`
+      "</div>" +
+        "</div>";
+      const infowindow = new google.maps.InfoWindow({
+        content: contentString,
+      });
+
+      console.log(data);
+      let location = { lat: data.features[0].center[1], lng: data.features[0].center[0] };
+      let marker = new google.maps.Marker(
+        {
+          map: map,
+          position: location,
+          title: dj
+        });
+
+      marker.addListener("click", () => {
+        infowindow.open({
+          anchor: marker,
+          map,
+          shouldFocus: false,
+        });
+      });
+    });
+}
+
+loadGoogleMapsApi({ key: process.env.API_KEY }).then(function (googleMaps) {
+  map = new googleMaps.Map(document.querySelector('.map'), {
+    center: {
+      lat: 40.7484405,
+      lng: -73.9944191
+    },
+    zoom: 3,
+    styles: [
+      { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+      { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+      { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+      {
+        featureType: "administrative.locality",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+      },
+      {
+        featureType: "poi",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+      },
+      {
+        featureType: "poi.park",
+        elementType: "geometry",
+        stylers: [{ color: "#263c3f" }],
+      },
+      {
+        featureType: "poi.park",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#6b9a76" }],
+      },
+      {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#38414e" }],
+      },
+      {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#212a37" }],
+      },
+      {
+        featureType: "road",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#9ca5b3" }],
+      },
+      {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#746855" }],
+      },
+      {
+        featureType: "road.highway",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#1f2835" }],
+      },
+      {
+        featureType: "road.highway",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#f3d19c" }],
+      },
+      {
+        featureType: "transit",
+        elementType: "geometry",
+        stylers: [{ color: "#2f3948" }],
+      },
+      {
+        featureType: "transit.station",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#d59563" }],
+      },
+      {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#17263c" }],
+      },
+      {
+        featureType: "water",
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#515c6d" }],
+      },
+      {
+        featureType: "water",
+        elementType: "labels.text.stroke",
+        stylers: [{ color: "#17263c" }],
+      },
+    ],
+  });
+  geocoder = new google.maps.Geocoder();
+}).catch(function (error) {
+  console.error(error)
+})
+
 
 GSheetReader(options, results => {
   if (options.theme == 'light') {
@@ -49,9 +191,9 @@ GSheetReader(options, results => {
 
   setInterval(() => {
     let now = DateTime.now().toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS);
-    timeHolder.innerHTML = `<p>All listings are in ${currentTimezoneLocale} time.<br />Your current time is ${now}`;   
+    timeHolder.innerHTML = `<p>All listings are in ${currentTimezoneLocale} time.<br />Your current time is ${now}`;
   }, 1000);
- 
+
 
   title.innerHTML = results[0]["Raid Title"];
   blurb.innerHTML = results[0]["Blurb"];
@@ -98,24 +240,27 @@ GSheetReader(options, results => {
       let isLive = false;
       let hasLocation = true;
       let hasGenre = true;
-      if (result["Location"] == "")
+      if (result["Location"] == "") {
         hasLocation = false;
+      } else {
+        codeAddress(result["Location"], result["DJ Name"], result["Twitch handle"]);
+      }
       if (result["Genre"] == "")
         hasGenre = false;
       let slotTime = result["DateTime"];
       let convertedTime = DateTime.fromISO(slotTime);
       convertedTime = convertedTime.setZone(localTimezone);
       if (index < timeslotCount - 1) {
-          let nextIndex = index + slotLength;
-          let nextTime = results[nextIndex].DateTime;
-          slotTime = DateTime.fromISO(slotTime);
-          nextTime = DateTime.fromISO(nextTime);
-          if ((DateTime.now() > slotTime) && (DateTime.now() < nextTime)) {
-            isLive = true;
-          }
-        } else if ((DateTime.now() > slotTime)) {
+        let nextIndex = index + slotLength;
+        let nextTime = results[nextIndex].DateTime;
+        slotTime = DateTime.fromISO(slotTime);
+        nextTime = DateTime.fromISO(nextTime);
+        if ((DateTime.now() > slotTime) && (DateTime.now() < nextTime)) {
           isLive = true;
         }
+      } else if ((DateTime.now() > slotTime)) {
+        isLive = true;
+      }
       let newDateList = convertedTime.toLocaleString(DateTime.DATE_MED);
       if (newDateList != currentDateList) {
         newDate = true;
