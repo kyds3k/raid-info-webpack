@@ -214,4 +214,22 @@ footer {
 
 .map {
   height: 50vh;
+  width: 90%;
+  margin: 0 auto 100px;
+
+  .firstHeading {
+    color: #000;
+    margin: 0 0 5px;
+    padding: 0;
+  }
+
+  p {
+    color: #000;
+    margin: 0 0 10px;
+  }
+
+  a {
+    color: blue;
+  }
+
 }

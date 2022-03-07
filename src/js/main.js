@@ -27,21 +27,43 @@ let geocoder;
 let mapQueries = 0;
 let overage = 0;
 
-function codeAddress(address) {
-  mapQueries++;           
-  
-  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${options.mapboxKey}`)
-  .then(response => response.json())
-  .then(data => {
-    let location = {lat: data.features[0].center[1], lng: data.features[0].center[0]};
-    console.log(location);
-    let marker = new google.maps.Marker(
-      {
-        map: map,
-        position: location
-      }
-    );
-  });
+function codeAddress(address, dj, handle) {
+  mapQueries++;
+
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${options.mapboxKey}&types=country,place`)
+    .then(response => response.json())
+    .then(data => {
+      const contentString =
+        '<div id="content">' +
+        '<div id="siteNotice">' +
+        "</div>" +
+        `<h1 id="firstHeading" class="firstHeading">${dj}</h1>` +
+        '<div id="bodyContent">' +
+        `<p>${address}</p>`+
+        `<a href="https://twitch.tv/${handle}" target= "_blank">https://twitch.tv/${handle}</a>`
+      "</div>" +
+        "</div>";
+      const infowindow = new google.maps.InfoWindow({
+        content: contentString,
+      });
+
+      console.log(data);
+      let location = { lat: data.features[0].center[1], lng: data.features[0].center[0] };
+      let marker = new google.maps.Marker(
+        {
+          map: map,
+          position: location,
+          title: dj
+        });
+
+      marker.addListener("click", () => {
+        infowindow.open({
+          anchor: marker,
+          map,
+          shouldFocus: false,
+        });
+      });
+    });
 }
 
 loadGoogleMapsApi({ key: process.env.API_KEY }).then(function (googleMaps) {
@@ -50,7 +72,7 @@ loadGoogleMapsApi({ key: process.env.API_KEY }).then(function (googleMaps) {
       lat: 40.7484405,
       lng: -73.9944191
     },
-    zoom: 1,
+    zoom: 3,
     styles: [
       { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
       { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -130,7 +152,7 @@ loadGoogleMapsApi({ key: process.env.API_KEY }).then(function (googleMaps) {
         elementType: "labels.text.stroke",
         stylers: [{ color: "#17263c" }],
       },
-    ],    
+    ],
   });
   geocoder = new google.maps.Geocoder();
 }).catch(function (error) {
@@ -221,7 +243,7 @@ GSheetReader(options, results => {
       if (result["Location"] == "") {
         hasLocation = false;
       } else {
-        codeAddress(result["Location"]);
+        codeAddress(result["Location"], result["DJ Name"], result["Twitch handle"]);
       }
       if (result["Genre"] == "")
         hasGenre = false;
