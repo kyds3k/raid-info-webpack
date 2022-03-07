@@ -54,6 +54,8 @@
   },
   "dependencies": {
     "fs": "^0.0.1-security",
+    "load-google-maps-api": "^2.0.2",
+    "mapbox-gl": "^2.7.0",
     "path": "^0.12.7"
   }
 }
