@@ -26,11 +26,12 @@ let map;
 let geocoder;
 let mapQueries = 0;
 let overage = 0;
+let infowindow;
 
 function codeAddress(address, dj, handle) {
   mapQueries++;
 
-  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${options.mapboxKey}&types=country,place`)
+  fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=${options.mapboxKey}&types=district,place`)
     .then(response => response.json())
     .then(data => {
       const contentString =
@@ -43,9 +44,6 @@ function codeAddress(address, dj, handle) {
         `<a href="https://twitch.tv/${handle}" target= "_blank">https://twitch.tv/${handle}</a>`
       "</div>" +
         "</div>";
-      const infowindow = new google.maps.InfoWindow({
-        content: contentString,
-      });
 
       console.log(data);
       let location = { lat: data.features[0].center[1], lng: data.features[0].center[0] };
@@ -57,6 +55,9 @@ function codeAddress(address, dj, handle) {
         });
 
       marker.addListener("click", () => {
+        infowindow = new google.maps.InfoWindow({
+          content: contentString,
+        });
         infowindow.open({
           anchor: marker,
           map,
@@ -72,7 +73,7 @@ loadGoogleMapsApi({ key: process.env.API_KEY }).then(function (googleMaps) {
       lat: 40.7484405,
       lng: -73.9944191
     },
-    zoom: 3,
+    zoom: 2,
     styles: [
       { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
       { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -180,7 +181,7 @@ GSheetReader(options, results => {
   const linkColor = results[0]["Link color"];
   const timeHolder = document.querySelector('.timenow');
   const columns = results[0]["Columns"];
-
+  
   let localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     , selectedIANA = localTimezone
     , currentTimezoneLocale = localTimezone.split("/").pop().replaceAll(/_/gi, " ");
